@@ -1,2 +1,6 @@
-# atlas
-A general-purpose OS.
+# Atlas
+A general purpose operating system.
+
+Planned features:
+    - 
+    - 
