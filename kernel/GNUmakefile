@@ -13,14 +13,5 @@ endif
 # Default target.
 .PHONY: all
 all:
-	cargo build --target x86_64-unknown-none --profile $(RUST_PROFILE)
-	cp target/x86_64-unknown-none/$(RUST_PROFILE_SUBDIR)/limine-rust-barebones kernel.elf
-
-# Remove object files and the final executable.
-.PHONY: clean
-clean:
-	cargo clean
-	rm -rf kernel.elf
-
-.PHONY: distclean
-distclean: clean
+	cargo build --profile $(RUST_PROFILE)
+	cp target/atlas-x86_64/$(RUST_PROFILE_SUBDIR)/atlas.elf kernel.elf

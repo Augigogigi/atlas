@@ -1,0 +1,11 @@
+{
+	"rust-analyzer.linkedProjects": [
+		".\\kernel\\Cargo.toml"
+	],
+    "rust-analyzer.check.allTargets": false,
+    "rust-analyzer.check.extraArgs": [
+        "--target",
+        "atlas-x86_64.json"
+	],
+	"rust-analyzer.showUnlinkedFileNotification": false
+}

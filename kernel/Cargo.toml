@@ -1,7 +1,11 @@
 [package]
-name = "limine-rust-barebones"
+name = "atlas"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# Bootloader
 limine = "0.1.11"
+
+# Utility
+once_cell = { version = "1.18.0", default-features = false }

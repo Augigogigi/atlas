@@ -1,48 +1,34 @@
 #![no_std]
 #![no_main]
 
-use core::arch::asm;
+#![feature(strict_provenance)]
+#![feature(const_mut_refs)]
 
-static FRAMEBUFFER_REQUEST: limine::FramebufferRequest = limine::FramebufferRequest::new(0);
+pub mod api;
+pub mod arch;
 
 #[no_mangle]
 unsafe extern "C" fn _start() -> ! {
-    // Ensure we got a framebuffer.
-    if let Some(framebuffer_response) = FRAMEBUFFER_REQUEST.get_response().get() {
-        if framebuffer_response.framebuffer_count < 1 {
-            hcf();
-        }
+	kprintln!("Hello, World!");
 
-        // Get the first framebuffer's information.
-        let framebuffer = &framebuffer_response.framebuffers()[0];
-
-        for i in 0..100_usize {
-            // Calculate the pixel offset using the framebuffer information we obtained above.
-            // We skip `i` scanlines (pitch is provided in bytes) and add `i * 4` to skip `i` pixels forward.
-            let pixel_offset = i * framebuffer.pitch as usize + i * 4;
-
-            // Write 0xFFFFFFFF to the provided pixel offset to fill it white.
-            // We can safely unwrap the result of `as_ptr()` because the framebuffer address is
-            // guaranteed to be provided by the bootloader.
-            unsafe {
-                *(framebuffer.address.as_ptr().unwrap().offset(pixel_offset as isize) as *mut u32) = 0xFFFFFFFF;
-            }
-        }
-    }
-
-    hcf();
+	hang();
 }
 
 #[panic_handler]
-fn rust_panic(_info: &core::panic::PanicInfo) -> ! {
-    hcf();
+fn panic(info: &core::panic::PanicInfo) -> ! {
+	unsafe {
+		use api::display::*;
+
+		terminal::TERMINAL.reset();
+		FRAMEBUFFER.draw_rect(0, 0, (FRAMEBUFFER.width - 1) as usize, (FRAMEBUFFER.height - 1) as usize, 0xFF0000);
+
+		kprintln!("{}", info);
+
+		hang()
+	}
 }
 
-fn hcf() -> ! {
-    unsafe {
-        asm!("cli");
-        loop {
-            asm!("hlt");
-        }
-    }
+unsafe fn hang() -> ! {
+	core::arch::asm!("cli");
+	loop { core::arch::asm!("hlt"); }
 }

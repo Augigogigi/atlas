@@ -1,7 +1,7 @@
 # Nuke built-in rules and variables.
 override MAKEFLAGS += -rR
 
-override IMAGE_NAME := barebones
+override IMAGE_NAME := atlas
 
 # Convenience macro to reliably declare user overridable variables.
 define DEFAULT_VAR =
@@ -81,7 +81,7 @@ $(IMAGE_NAME).iso: limine kernel
 	rm -rf iso_root
 
 $(IMAGE_NAME).hdd: limine kernel
-	rm -f $(IMAGE_NAME).hdd
+	rm -rf $(IMAGE_NAME).hdd
 	dd if=/dev/zero bs=1M count=0 seek=64 of=$(IMAGE_NAME).hdd
 	sgdisk $(IMAGE_NAME).hdd -n 1:2048 -t 1:ef00
 	./limine/limine bios-install $(IMAGE_NAME).hdd
