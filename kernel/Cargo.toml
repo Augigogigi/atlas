@@ -8,4 +8,10 @@ edition = "2021"
 limine = "0.1.11"
 
 # Utility
+spin = "0.9.8"
 once_cell = { version = "1.18.0", default-features = false }
+lazy_static = { version = "1.4.0", default-features = false, features = [ "spin_no_std" ] }
+
+# Arch
+x86_64 = "0.14.11"
+

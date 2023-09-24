@@ -6,10 +6,11 @@
 
 pub mod api;
 pub mod arch;
+pub mod boot;
 
 #[no_mangle]
 unsafe extern "C" fn _start() -> ! {
-	kprintln!("Hello, World!");
+	api::syscall::init();
 
 	hang();
 }
@@ -17,12 +18,14 @@ unsafe extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
 	unsafe {
-		use api::display::*;
+		if let Some(_) = boot::KERNEL_DATA.framebuffer {
+			use api::display::*;
+	
+			terminal::TERMINAL.reset();
+			framebuffer::FRAMEBUFFER.draw_rect(0, 0, (framebuffer::FRAMEBUFFER.width - 1) as usize, (framebuffer::FRAMEBUFFER.height - 1) as usize, 0xFF0000);
 
-		terminal::TERMINAL.reset();
-		FRAMEBUFFER.draw_rect(0, 0, (FRAMEBUFFER.width - 1) as usize, (FRAMEBUFFER.height - 1) as usize, 0xFF0000);
-
-		kprintln!("{}", info);
+			kprintln!("{}", info);
+		}
 
 		hang()
 	}

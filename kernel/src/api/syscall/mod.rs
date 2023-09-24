@@ -11,6 +11,6 @@ pub fn syscall(call_id: usize, arg1: usize, arg2: usize, arg3: usize, arg4: usiz
 	return crate::arch::riscv64::syscall::syscall(call_id, arg1, arg2, arg3, arg4);
 }
 
-pub fn test() -> usize {
-	syscall(id::TEST, 0, 0, 0, 0)
+pub fn init() -> usize {
+	syscall(id::INIT, 0, 0, 0, 0)
 }
