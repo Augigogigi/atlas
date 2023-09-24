@@ -1,21 +1,20 @@
 pub mod font;
+pub mod macros;
 
 use once_cell::unsync::Lazy;
 
 const MARGIN: (usize, usize) = (4, 4);
 
-const BG_COLOR: u32 = 0x29282B;
-const TEXT_COLOR: u32 = 0xCCCCCC;
-
 /* Global Terminal */
 pub static mut TERMINAL: Lazy<Terminal> = Lazy::new(|| unsafe {
-	super::framebuffer::FRAMEBUFFER.clear(BG_COLOR);
+	super::framebuffer::FRAMEBUFFER.clear(super::BG_COLOR);
 	Terminal {
 		framebuffer: &mut super::framebuffer::FRAMEBUFFER,
 		font: font::DEFAULT_FONT,
 		size: ((super::framebuffer::FRAMEBUFFER.width as usize - (MARGIN.0 * 2)) / font::DEFAULT_FONT.char_width, (super::framebuffer::FRAMEBUFFER.height as usize - (MARGIN.0 * 2)) / font::DEFAULT_FONT.char_height),
 		margin: MARGIN,
 		cursor: (0, 0),
+		color: super::TEXT_COLOR,
 	}
 });
 
@@ -25,12 +24,13 @@ pub struct Terminal<'a> {
 	size: (usize, usize),
 	margin: (usize, usize),
 	cursor: (usize, usize),
+	color: u32,
 }
 
 impl<'a> Terminal<'a> {
 	/* Reset the terminal */
 	pub fn reset(&mut self) {
-		self.framebuffer.clear(BG_COLOR);
+		self.framebuffer.clear(super::BG_COLOR);
 		self.cursor.0 = 0;
 		self.cursor.1 = 0;
 	}
@@ -41,8 +41,12 @@ impl<'a> Terminal<'a> {
 		self.cursor.1 += 1;
 	}
 
+	pub fn color(&mut self, color: u32) {
+		self.color = color;
+	}
+
 	/* Write a character */
-	fn write_char(&mut self, character: char, color: u32) {
+	fn write_char(&mut self, character: char) {
 		if self.cursor.0 >= self.size.0 {
 			self.newline();
 		}
@@ -65,7 +69,7 @@ impl<'a> Terminal<'a> {
 							let cursor_offset_x = (self.cursor.0 * self.font.char_width) + margin_offset_x + self.margin.0;
 							let cursor_offset_y = (self.cursor.1 * self.font.char_height) + margin_offset_y + self.margin.1;
 		
-							self.framebuffer.draw_pixel(cursor_offset_x + (7 - col), cursor_offset_y + row, color);
+							self.framebuffer.draw_pixel(cursor_offset_x + (7 - col), cursor_offset_y + row, self.color);
 						}
 					}
 				}
@@ -81,7 +85,7 @@ impl<'a> Terminal<'a> {
 impl<'a> core::fmt::Write for Terminal<'a> {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         for character in s.chars() {
-			self.write_char(character, TEXT_COLOR);
+			self.write_char(character);
 		}
 		Ok(())
     }
@@ -93,21 +97,4 @@ pub fn _print(args: core::fmt::Arguments) {
 	unsafe {
 		TERMINAL.write_fmt(args).unwrap();
 	}
-}
-
-#[macro_export]
-macro_rules! kprint {
-    ($($arg:tt)*) => {
-		$crate::api::display::terminal::_print(format_args!($($arg)*))
-	};
-}
-
-#[macro_export]
-macro_rules! kprintln {
-    () => {
-		$crate::print!("\n")
-	};
-    ($($arg:tt)*) => {
-		$crate::kprint!("{}\n", format_args!($($arg)*))
-	};
 }

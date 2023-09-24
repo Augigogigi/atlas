@@ -11,7 +11,7 @@ pub fn init() -> usize {
 	} else {
 		panic!("Limine did not respond to FRAMEBUFFER_REQUEST!");
 	}
-	crate::kprintln!("[ INFO ] Framebuffer Loaded!");
+	crate::success!("Booted with valid framebuffer!");
 
 	/* Get Kernel Address */
 	if let Some(kernel_address_response) = crate::boot::KERNEL_ADDRESS_REQUEST.get_response().get() {
@@ -22,8 +22,8 @@ pub fn init() -> usize {
 	} else {
 		panic!("Limine did not respond to KERNEL_ADDRESS_REQUEST!");
 	}
-	crate::kprintln!("[ INFO ] KernelPAddr: {:#018X}", unsafe { crate::boot::KERNEL_DATA.kernel_p_addr });
-	crate::kprintln!("[ INFO ] KernelVAddr: {:#018X}", unsafe { crate::boot::KERNEL_DATA.kernel_v_addr });
+	crate::info!("KernelPAddr: {:#018X}", unsafe { crate::boot::KERNEL_DATA.kernel_p_addr });
+	crate::info!("KernelVAddr: {:#018X}", unsafe { crate::boot::KERNEL_DATA.kernel_v_addr });
 
 	/* Get Stack Address */
 	unsafe {
@@ -39,12 +39,16 @@ pub fn init() -> usize {
 	if let None = crate::boot::STACK_SIZE_REQUEST.get_response().get() {
 		panic!("Limine did not respond to STACK_SIZE_REQUEST!");
 	}
-	crate::kprintln!("[ INFO ] StackAddr: {:#018X}", unsafe { crate::boot::KERNEL_DATA.stack_addr });
-	crate::kprintln!("[ INFO ] StackSize: {} Bytes", crate::boot::STACK_SIZE);
+	crate::info!("StackAddr: {:#018X}", unsafe { crate::boot::KERNEL_DATA.stack_addr });
+	crate::info!("StackSize: {} Bytes", crate::boot::STACK_SIZE);
 
 	/* Load GDT */
 	crate::arch::x86_64::interrupts::gdt::init();
-	crate::kprintln!("[ INFO ] GDT Loaded!");
+	crate::success!("GDT Initialized!");
+
+	/* Load IDT */
+	crate::arch::x86_64::interrupts::idt::init();
+	crate::success!("IDT Initialized!");
 
 	return 0;
 }

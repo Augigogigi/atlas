@@ -11,13 +11,13 @@ use x86_64::{
 	VirtAddr,
 };
 
-const TSS_IST_DOUBLE_FAULT_INDEX: usize = 0;
+pub const IST_DOUBLE_FAULT_INDEX: usize = 0;
 
 lazy_static! {
 	static ref TSS: TaskStateSegment = {
 		let mut tss = TaskStateSegment::new();
 	
-		tss.interrupt_stack_table[TSS_IST_DOUBLE_FAULT_INDEX] = unsafe {
+		tss.interrupt_stack_table[IST_DOUBLE_FAULT_INDEX] = unsafe {
 			VirtAddr::new(crate::boot::KERNEL_DATA.stack_addr as u64) + crate::boot::STACK_SIZE
 		};
 	
